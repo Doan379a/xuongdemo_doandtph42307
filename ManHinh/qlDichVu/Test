@@ -16,7 +16,6 @@ import {
   DELETE_ITEM_ID_DICH_VU,
   UPDATE_ITEM_ID_DICH_VU,
 } from "../../linkapi/diaChi_api";
-import * as ImagePicker from "expo-image-picker";
 import TextInputCustom from "../../Custom/Text_Input_custom";
 import Button_custom from "../../Custom/Button_custom";
 
@@ -34,19 +33,6 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
   const [errorTrangThai, seterrorTrangThai] = useState(true);
   const [errormoTa, seterrormoTa] = useState("");
 
-  const [upanh, setupanh] = useState(null);
-  const pickImage = async () => {
-    let kq = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    console.log(kq);
-    if (!kq.canceled) {
-      setupanh(kq.assets[0].uri);
-    }
-  };
   const handcheckupTen = (text) => {
     if (text.trim() === "") {
       seterrorTen("Không được để trống");
@@ -99,7 +85,7 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
           gia: parseFloat(upGia),
           trangthai: upTrangThai,
           mota: upmoTa,
-          anh: upanh, // Bạn có thể cập nhật ảnh tùy theo logic của bạn
+          // anh: upanh, // Bạn có thể cập nhật ảnh tùy theo logic của bạn
         }
       );
       console.log(response.data);
@@ -133,7 +119,6 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
             setupGia(gia.toString());
             setupTrangThai(trangthai);
             setupmoTa(mota);
-            setupanh(anh);
           }}
         >
           <Text style={styles.actionText}>Sửa</Text>
@@ -176,7 +161,7 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
             Tên dịch vụ: {ten}
           </Text>
           <Text>Giá: {gia}</Text>
-          <Text style={{ color: trangthai ? "blue" : "red" }}>
+          <Text>
             Trang thái: {trangthai ? "Đang hoạt động" : "Ngừng hoạt động"}
           </Text>
           <Text numberOfLines={xemThem ? undefined : 3} style={{}}>
@@ -259,6 +244,28 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
               />
             </View>
             {/* 3 */}
+            <TouchableOpacity
+              style={[styles.cuc1, { top: -10 }]}
+              onPress={() => setupTrangThai(!upTrangThai)}
+            >
+              <Text
+                style={[
+                  styles.theText,
+                  {
+                    fontSize: 18,
+                    textAlign: "auto",
+                  },
+                ]}
+              >
+                Trạng thái:{"   "}
+                <Text
+                  style={{ fontSize: 16, color: upTrangThai ? "blue" : "red" }}
+                >
+                  {upTrangThai ? "Đang hoạt động" : "Ngừng hoạt động"}
+                </Text>
+              </Text>
+            </TouchableOpacity>
+            {/* 4*/}
             <View
               style={[
                 styles.cuc1,
@@ -277,69 +284,6 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
                 error={errormoTa}
                 numberOfLines={2}
                 style={[styles.bottncustom, {}]}
-              />
-            </View>
-            {/* 4 */}
-            <View style={[styles.flex_ngang]}>
-              <View style={{ height: "100%" }}>
-                {/* trang thai */}
-                <Text
-                  style={[
-                    styles.theText,
-                    {
-                      fontSize: 18,
-                      textAlign: "auto",
-                      alignItems: "center",
-                    },
-                  ]}
-                >
-                  Trạng thái:
-                  <TouchableOpacity
-                    style={[styles.cuc1, { height: 20, top: 50 }]}
-                    onPress={() => setupTrangThai(!upTrangThai)}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 15,
-                        color: upTrangThai ? "blue" : "red",
-                      }}
-                    >
-                      {upTrangThai ? "Đang hoạt động" : "Ngừng hoạt động"}
-                    </Text>
-                  </TouchableOpacity>
-                </Text>
-                {/* chon anh */}
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "green",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 10,
-                    borderRadius: 10,
-                    top: 30,
-                    width: "40%",
-                  }}
-                  onPress={pickImage}
-                >
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      color: "white",
-                      fontSize: 13,
-                    }}
-                  >
-                    Chọn ảnh
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <Image
-                source={{ uri: upanh }}
-                style={{
-                  height: 100,
-                  width: 100,
-                  backgroundColor: "red",
-                  resizeMode: "stretch",
-                }}
               />
             </View>
             <Button_custom
@@ -393,12 +337,6 @@ const styles = StyleSheet.create({
   theText: { fontSize: 32, width: "100%", textAlign: "center" },
   cuc1: { paddingHorizontal: 20 },
   bottncustom: { height: 45 },
-  flex_ngang: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    justifyContent: "space-between",
-  },
 });
 
 export default Item_Dich_vu;

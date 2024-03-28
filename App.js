@@ -26,7 +26,6 @@ import Man_cho from "./ManHinh/dangNhap_manCho/Man_cho";
 import MH_dang_ky from "./ManHinh/dangKy/MH_dang_ky";
 import TrangChu from "./ManHinh/mh_TrangChu/TrangChu";
 import Chi_tiet_dich_vu from "./ManHinh/mh_TrangChu/Chi_tiet_dich_vu";
-import Test from "./ManHinh/qlDichVu/Test";
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 

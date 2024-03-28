@@ -175,6 +175,7 @@ const Chi_tiet_dich_vu = () => {
                   justifyContent: "space-between",
                   alignItems: "center",
                 }}
+                keyExtractor={(item) => item._id}
                 renderItem={({ item }) => {
                   return (
                     <View style={{ flex: 1, margin: 10, alignSelf: "center" }}>

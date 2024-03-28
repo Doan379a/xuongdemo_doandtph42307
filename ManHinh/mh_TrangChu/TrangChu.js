@@ -168,7 +168,7 @@ const TrangChu = () => {
               showsHorizontalScrollIndicator={false}
               overScrollMode="never" // Ngăn chặn hiệu ứng "bóng" khi vuốt tới cuối danh sách
               overScrollColor="transparent" // Đặt màu sắc của hiệu ứng bóng là transparent
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item?._id}
               renderItem={({ item }) => {
                 return <Item_dv_Duoc_Chon_nhieu data={item} />;
               }}
@@ -181,7 +181,7 @@ const TrangChu = () => {
               showsHorizontalScrollIndicator={false}
               overScrollMode="never" // Ngăn chặn hiệu ứng "bóng" khi vuốt tới cuối danh sách
               overScrollColor="transparent" // Đặt màu sắc của hiệu ứng bóng là transparent
-              keyExtractor={(item) => item.id} // Sử dụng item.id hoặc một thuộc tính duy nhất khác nếu có
+              keyExtractor={(item) => item?._id} // Sử dụng item.id hoặc một thuộc tính duy nhất khác nếu có
               renderItem={({ item }) => {
                 return <Item_dv_Duoc_Chon_nhieu data={item} />;
               }}
