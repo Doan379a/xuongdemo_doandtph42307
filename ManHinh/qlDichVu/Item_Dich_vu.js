@@ -9,6 +9,7 @@ import {
   Alert,
   ToastAndroid,
   Modal,
+  FlatList,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import {
@@ -33,18 +34,19 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
   const [errorGia, seterrorGia] = useState("");
   const [errorTrangThai, seterrorTrangThai] = useState(true);
   const [errormoTa, seterrormoTa] = useState("");
-
-  const [upanh, setupanh] = useState(null);
+  const arrImages = anh[0].split(",");
+  const [upanh, setupanh] = useState([]);
   const pickImage = async () => {
-    let kq = await ImagePicker.launchImageLibraryAsync({
+    let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      multiple: true, // Cho phép chọn nhiều ảnh
     });
-    console.log(kq);
-    if (!kq.canceled) {
-      setupanh(kq.assets[0].uri);
+
+    if (!result.cancelled) {
+      setupanh([...upanh, ...result.assets.map((asset) => asset.uri)]);
     }
   };
   const handcheckupTen = (text) => {
@@ -109,6 +111,7 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
       setupGia(0);
       setupTrangThai("");
       setupmoTa("");
+      setupanh([]);
       ToastAndroid.show("Cập nhật thành công", ToastAndroid.SHORT);
     } catch (error) {
       console.error("Lỗi khi cập nhật mục:", error);
@@ -169,8 +172,13 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
   };
   return (
     <Swipeable renderRightActions={renderRightActions}>
-      <View style={styles.container}>
-        <Image source={{ uri: anh }} style={styles.image} />
+      <View style={[styles.container]}>
+        {arrImages.length > 0 && (
+          <Image
+            source={{ uri: arrImages[0] }}
+            style={[xemThem ? styles.image2 : styles.image]}
+          />
+        )}
         <View style={styles.info}>
           <Text style={styles.title} numberOfLines={xemThem ? undefined : 1}>
             Tên dịch vụ: {ten}
@@ -182,7 +190,15 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
           <Text numberOfLines={xemThem ? undefined : 3} style={{}}>
             Mô tả: {mota}
           </Text>
-          <TouchableOpacity onPress={() => setXemThem(!xemThem)}>
+          <TouchableOpacity
+            onPress={() => setXemThem(!xemThem)}
+            style={{
+              alignSelf: "",
+              // alignItems: "flex-end",
+              // justifyContent: "flex-end",
+              bottom: xemThem ? "auto" : 0,
+            }}
+          >
             <Text style={styles.expandText}>{xemThem ? "Ẩn" : "Xem thêm"}</Text>
           </TouchableOpacity>
         </View>
@@ -204,6 +220,7 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
             seterrorTen("");
             seterrorGia("");
             seterrormoTa("");
+            setupanh([]);
           }}
           style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.2)" }}
         />
@@ -275,75 +292,112 @@ const Item_Dich_vu = ({ data, capNhat_DS }) => {
                 value={upmoTa}
                 onChangeText={handcheckupmoTa}
                 error={errormoTa}
-                numberOfLines={2}
-                style={[styles.bottncustom, {}]}
+                numberOfLines={3}
+                style={[styles.bottncustom, { height: "auto" }]}
               />
             </View>
             {/* 4 */}
-            <View style={[styles.flex_ngang]}>
-              <View style={{ height: "100%" }}>
-                {/* trang thai */}
-                <Text
-                  style={[
-                    styles.theText,
-                    {
-                      fontSize: 18,
-                      textAlign: "auto",
-                      alignItems: "center",
-                    },
-                  ]}
-                >
-                  Trạng thái:
-                  <TouchableOpacity
-                    style={[styles.cuc1, { height: 20, top: 50 }]}
-                    onPress={() => setupTrangThai(!upTrangThai)}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 15,
-                        color: upTrangThai ? "blue" : "red",
-                      }}
-                    >
-                      {upTrangThai ? "Đang hoạt động" : "Ngừng hoạt động"}
-                    </Text>
-                  </TouchableOpacity>
-                </Text>
-                {/* chon anh */}
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "green",
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
+                padding: 20,
+              }}
+            >
+              <Text
+                style={[
+                  styles.theText,
+                  {
+                    fontSize: 18,
+                    textAlign: "auto",
+                    width: "30%",
+                    // flex: 1,
+                  },
+                ]}
+              >
+                Trạng thái:
+              </Text>
+              <TouchableOpacity
+                style={[
+                  {
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: 10,
-                    borderRadius: 10,
-                    top: 30,
-                    width: "40%",
-                  }}
-                  onPress={pickImage}
+                    borderWidth: 1.5,
+                    borderRadius: 50,
+                    borderColor: "gray",
+                    width: 20,
+                    height: 20,
+                    marginEnd: 10,
+                  },
+                ]}
+                onPress={() => setupTrangThai(!upTrangThai)}
+              >
+                <Text
+                  style={{ textAlign: "center", fontSize: 10, color: "gray" }}
                 >
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      color: "white",
-                      fontSize: 13,
-                    }}
-                  >
-                    Chọn ảnh
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <Image
-                source={{ uri: upanh }}
+                  {upTrangThai ? "V" : " "}
+                </Text>
+              </TouchableOpacity>
+              <Text
                 style={{
-                  height: 100,
-                  width: 100,
-                  backgroundColor: "red",
-                  resizeMode: "stretch",
+                  fontSize: 15,
+                  color: upTrangThai ? "blue" : "red",
                 }}
+              >
+                {upTrangThai ? "Đang hoạt động" : "Ngừng hoạt động"}
+              </Text>
+            </View>
+            {/* chon anh 5*/}
+            <View style={{ paddingHorizontal: 20 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "gray",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 10,
+                  borderRadius: 10,
+                  width: "40%",
+                  marginBottom: 10,
+                }}
+                onPress={pickImage}
+                disabled
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: "white",
+                    fontSize: 13,
+                  }}
+                >
+                  Chọn ảnh
+                </Text>
+              </TouchableOpacity>
+              <FlatList
+                horizontal
+                data={arrImages}
+                overScrollMode="never"
+                overScrollColor="transparent"
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => (
+                  <View style={{ marginRight: 0 }}>
+                    <Image
+                      style={{
+                        width: 100,
+                        height: 100,
+                        resizeMode: "stretch",
+                        margin: 5,
+                        zIndex: anh.length - index, // Đảm bảo thứ tự hiển thị
+                      }}
+                      source={{ uri: item }}
+                    />
+                  </View>
+                )}
               />
             </View>
+
             <Button_custom
               noidung="Sửa"
+              style={styles.buttoncustom}
               onPress={() => {
                 CapNhatItem();
                 console.log(upGia, upTen);
@@ -364,13 +418,19 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   image: {
-    height: 180,
+    height: 200,
+    width: 150,
+    resizeMode: "stretch",
+  },
+  image2: {
+    height: "100%",
     width: 150,
     resizeMode: "stretch",
   },
   info: {
     flex: 1,
     marginHorizontal: 10,
+    height: "100%",
   },
   title: {
     fontSize: 17,
@@ -399,6 +459,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: "space-between",
   },
+  buttoncustom: { borderRadius: 10 },
 });
 
 export default Item_Dich_vu;

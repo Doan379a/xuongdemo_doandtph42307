@@ -89,7 +89,7 @@ const TrangChu = () => {
       url: "https://nicolebridal.vn/wp-content/uploads/2018/10/nhung-mau-ao-cuoi-duoi-ca-dep-nhat-21.jpg",
     },
   ]);
-  useEffect(() => {
+  const capNhat_DS = () => {
     axios
       .get(`${API_URL}${GET_LIST_DICH_VU}`)
       .then((response) => {
@@ -98,7 +98,16 @@ const TrangChu = () => {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []);
+  };
+  useEffect(() => {
+    const reload = setInterval(() => {
+      capNhat_DS();
+    }, 5000); // Gọi hàm capNhat_DS() sau mỗi giây
+
+    return () => {
+      clearInterval(reload); // Xóa interval khi component unmount
+    };
+  }, []); // Sử dụng mảng dependency rỗng để hàm useEffect chỉ chạy một lần sau khi component được render lần đầu tiên
   return (
     <View style={styles.container}>
       <StatusBar

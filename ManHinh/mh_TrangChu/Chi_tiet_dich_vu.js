@@ -1,3 +1,4 @@
+import React, { useEffect, useState, useRef } from "react";
 import {
   Image,
   StatusBar,
@@ -8,11 +9,12 @@ import {
   ScrollView,
   FlatList,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { icon } from "../../Image";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { API_URL, GET_LIST_DICH_VU } from "../../linkapi/diaChi_api";
+import Swiper from "react-native-swiper";
+
 const Top = () => {
   const navigation = useNavigation();
   return (
@@ -44,19 +46,26 @@ const Top = () => {
       </Text>
       <TouchableOpacity style={{ height: 25 }}>
         <Image
-          source={{ uri: "https://img.icons8.com/?size=50&id=364&format=png" }}
+          source={{
+            uri: "https://img.icons8.com/?size=50&id=364&format=png",
+          }}
           style={{ height: 25, width: 25 }}
         />
       </TouchableOpacity>
     </View>
   );
 };
+
 const Chi_tiet_dich_vu = () => {
   const router = useRoute();
   const chuyenItem = router.params?.chuyenItem;
   const [moTa, setmoTa] = useState(true);
   const [danhSachGoiY, setdanhSachGoiY] = useState([]);
-  console.log(chuyenItem.mota);
+  const scrollViewRef = useRef(null);
+  const swiperRef = useRef(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [scrollEnabled, setScrollEnabled] = useState(false); // Khởi tạo là false
+
   useEffect(() => {
     axios
       .get(`${API_URL}${GET_LIST_DICH_VU}`)
@@ -67,6 +76,30 @@ const Chi_tiet_dich_vu = () => {
         console.error("Error fetching data:", error);
       });
   }, []);
+
+  const arrImages = chuyenItem.anh[0].split(",");
+
+  const handleImagePress = (index) => {
+    setCurrentImageIndex(index);
+    swiperRef.current.scrollBy(index - swiperRef.current.state.index);
+    setScrollEnabled(true); // Khi bấm vào ảnh ở dưới, cho phép cuộn ở trên
+  };
+
+  const handleScrollViewScroll = (event) => {
+    if (scrollEnabled) {
+      const contentOffsetX = event.nativeEvent.contentOffset.x;
+      const index = Math.floor(contentOffsetX / 158); // 158 là width của ảnh + 8 là margin giữa ảnh
+      setCurrentImageIndex(index);
+      swiperRef.current.scrollBy(index - swiperRef.current.state.index);
+    }
+  };
+
+  const handleListScroll = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    // Nếu vị trí cuộn là 0 (đầu danh sách), không cho phép cuộn ở trên
+    setScrollEnabled(offsetY !== 0);
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <StatusBar
@@ -76,19 +109,61 @@ const Chi_tiet_dich_vu = () => {
       />
       <Top />
       <FlatList
+        style={{ backgroundColor: "white" }}
         showsVerticalScrollIndicator={false}
-        overScrollMode="never" // Ngăn chặn hiệu ứng "bóng" khi vuốt tới cuối danh sách
-        overScrollColor="transparent" // Đặt màu sắc của hiệu ứng bóng là transparent
+        overScrollMode="never"
+        overScrollColor="transparent"
         ListHeaderComponent={
           <View style={{ flex: 1 }}>
-            <StatusBar
-              // translucent
-              barStyle="dark-content"
-              backgroundColor="white"
-            />
-            <Image source={{ uri: chuyenItem?.anh }} style={styles.image} />
+            <StatusBar barStyle="dark-content" backgroundColor="white" />
+            <View style={{ height: 370 }}>
+              <Swiper
+                style={{ height: 370 }}
+                ref={swiperRef}
+                loop={false}
+                showsPagination={false}
+                overScrollMode="never"
+                overScrollColor="transparent"
+                onScroll={handleListScroll}
+                index={currentImageIndex}
+              >
+                {arrImages.map((image, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: image }}
+                    style={styles.image}
+                  />
+                ))}
+              </Swiper>
+            </View>
+            <View style={{ height: 110, marginTop: 20, marginHorizontal: 15 }}>
+              <ScrollView
+                horizontal
+                ref={scrollViewRef}
+                overScrollMode="never"
+                overScrollColor="transparent"
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleScrollViewScroll}
+              >
+                {arrImages.map((image, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => handleImagePress(index)}
+                  >
+                    <Image
+                      source={{ uri: image }}
+                      style={{
+                        height: "100%",
+                        width: 130,
+                        margin: 6,
+                        resizeMode: "stretch",
+                      }}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
             <View style={styles.content}>
-              {/* Cục 1 */}
               <View
                 style={[
                   styles.flex_ngang,
@@ -105,7 +180,6 @@ const Chi_tiet_dich_vu = () => {
                   />
                 </TouchableOpacity>
               </View>
-              {/* Cục 2 */}
               <Text
                 style={[
                   styles.theText,
@@ -151,21 +225,23 @@ const Chi_tiet_dich_vu = () => {
                   }}
                 />
               </TouchableOpacity>
-              {moTa ? (
-                <View style={{ height: 400, backgroundColor: "green" }}>
-                  <Text style={[styles.theText, { color: "black" }]}>
-                    {chuyenItem?.mota}
-                  </Text>
-                  <Text>true</Text>
-                </View>
-              ) : (
-                <View style={{ height: 400, backgroundColor: "red" }}>
-                  <Text style={[styles.theText]}>{chuyenItem?.mota}</Text>
-                  <Text>false</Text>
-                </View>
-              )}
+              <View style={{ height: "auto", marginBottom: 20 }}>
+                <Text
+                  style={[
+                    styles.theText,
+                    {
+                      color: "black",
+                      fontSize: 16,
+                      fontWeight: "300",
+                      width: moTa ? "97%" : "100%",
+                    },
+                  ]}
+                  numberOfLines={moTa ? 3 : undefined}
+                >
+                  {chuyenItem?.mota}
+                </Text>
+              </View>
             </View>
-            {/* List 2 */}
             <View style={[styles.conten_list_goi_y]}>
               <Text style={[styles.theText]}>Bạn có thể thích</Text>
               <FlatList
@@ -176,19 +252,18 @@ const Chi_tiet_dich_vu = () => {
                   alignItems: "center",
                 }}
                 keyExtractor={(item) => item._id}
-                renderItem={({ item }) => {
-                  return (
-                    <View style={{ flex: 1, margin: 10, alignSelf: "center" }}>
-                      <TouchableOpacity>
-                        <Image
-                          source={{ uri: item?.anh }}
-                          style={{ height: 100, width: 150 }}
-                        />
-                        <Text>{item.gia}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                }}
+                renderItem={({ item }) => (
+                  <View style={{ flex: 1, margin: 10, alignSelf: "center" }}>
+                    <TouchableOpacity>
+                      <Image
+                        source={{ uri: item?.anh[0] }}
+                        style={{ height: 100, width: 150 }}
+                      />
+                      <Text>{item.gia}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                // onScroll={handleListScroll}
               />
             </View>
           </View>
@@ -201,16 +276,20 @@ const Chi_tiet_dich_vu = () => {
 export default Chi_tiet_dich_vu;
 
 const styles = StyleSheet.create({
-  image: { height: 350, width: "100%", resizeMode: "stretch", opacity: 0.6 },
+  image: { height: 350, width: "100%", resizeMode: "stretch", opacity: 0.8 },
   theText: { fontSize: 24, fontWeight: "400" },
-  content: { paddingHorizontal: 20, marginTop: 20, height: "auto" },
+  content: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+    height: "auto",
+  },
   flex_ngang: { flexDirection: "row", alignContent: "center" },
   content_mota: { paddingHorizontal: 20 },
   imgaIcon: { height: 25, width: 25 },
   conten_list_goi_y: {
     height: "auto",
     backgroundColor: "yellow",
-    // paddingHorizontal: 20,
+    paddingHorizontal: 20,
     marginBottom: 50,
   },
 });
